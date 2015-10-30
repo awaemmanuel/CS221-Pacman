@@ -1,6 +1,6 @@
 from util import manhattanDistance
 from game import Directions
-import random, util
+import random, util, sys
 
 from game import Agent
 
@@ -166,7 +166,37 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
 
     # BEGIN_YOUR_CODE (around 30 lines of code expected)
-    raise Exception("Not implemented yet")
+    # raise Exception("Not implemented yet")
+    # This returns the maximized move for agent 0
+    def vopt(depth,agentIndex,state):
+        # Need to loop the agents
+        if agentIndex == state.getNumAgents():
+            agentIndex = 0
+        # Need to decrement the depth
+        if agentIndex == 0:            
+            depth = depth - 1
+        # Basecase, just return the score
+        if depth == 0:
+            return (self.evaluationFunction(state), Directions.STOP)
+        validMoves = state.getLegalActions(agentIndex)
+        # [ (score, move) ]
+        scoreMove = []
+        for move in validMoves:
+            nextState = state.generateSuccessor(agentIndex,move)
+            pair = vopt(depth,agentIndex+1,nextState)
+            scoreMove.append( (pair[0],move) )
+        optimalPair = 0
+        if agentIndex > 0:
+            scoreMove.append( (sys.maxint,Directions.STOP) )
+            optimalPair = min(scoreMove, key = lambda t: t[0])
+        if agentIndex == 0:
+            scoreMove.append( (-1*sys.maxint,Directions.STOP) )
+            optimalPair = max(scoreMove, key = lambda t: t[0])
+        return optimalPair
+
+    (score,action) = vopt(self.depth + 1, 0, gameState)
+    print(score,action)
+    return action
     # END_YOUR_CODE
 
 ######################################################################################
