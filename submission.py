@@ -271,7 +271,43 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
     """
 
     # BEGIN_YOUR_CODE (around 25 lines of code expected)
-    raise Exception("Not implemented yet")
+    # raise Exception("Not implemented yet")
+    def isTerminal(state,validMoves):
+        if len(validMoves) == 0:
+            return True
+        if state.isWin() or state.isLose():
+            return True
+    # This returns the maximized move for agent 0
+    def vopt(depth,agentIndex,state):
+        # Need to loop the agents
+        if agentIndex == state.getNumAgents():
+            agentIndex = 0
+        # Need to decrement the depth
+        if agentIndex == 0:            
+            depth = depth - 1
+        # Basecase, just return the score
+        if depth == 0:
+            return (self.evaluationFunction(state), Directions.STOP)
+        validMoves = state.getLegalActions(agentIndex)
+        if isTerminal(state,validMoves):
+            return (state.getScore(), Directions.STOP)
+        # [ (score, move) ]
+        scoreMove = []
+        for move in validMoves:
+            nextState = state.generateSuccessor(agentIndex,move)
+            pair = vopt(depth,agentIndex+1,nextState)
+            scoreMove.append( (pair[0],move) )
+        optimalPair = 0
+        if agentIndex > 0:
+            optimalPair = random.choice(scoreMove)
+            averageScore = sum([pair[0] for pair in scoreMove])/len(scoreMove)
+            optimalPair = (averageScore,optimalPair[1])
+        if agentIndex == 0:
+            optimalPair = max(scoreMove, key = lambda t: t[0])
+        return optimalPair
+
+    (score,action) = vopt(self.depth + 1, self.index, gameState)
+    return action
     # END_YOUR_CODE
 
 ######################################################################################
