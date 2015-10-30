@@ -167,6 +167,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     # BEGIN_YOUR_CODE (around 30 lines of code expected)
     # raise Exception("Not implemented yet")
+    def isTerminal(state,validMoves):
+        if len(validMoves) == 0:
+            return (True, Directions.STOP)
+        if state.isWin() or state.isLose():
+            return (True, validMoves[0])
+        return (False, Directions.STOP)
     # This returns the maximized move for agent 0
     def vopt(depth,agentIndex,state):
         # Need to loop the agents
@@ -179,6 +185,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
         if depth == 0:
             return (self.evaluationFunction(state), Directions.STOP)
         validMoves = state.getLegalActions(agentIndex)
+        terminalMove = isTerminal(state,validMoves)
+        if terminalMove[0]:
+            return terminalMove
         # [ (score, move) ]
         scoreMove = []
         for move in validMoves:
@@ -187,15 +196,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
             scoreMove.append( (pair[0],move) )
         optimalPair = 0
         if agentIndex > 0:
-            scoreMove.append( (sys.maxint,Directions.STOP) )
             optimalPair = min(scoreMove, key = lambda t: t[0])
         if agentIndex == 0:
-            scoreMove.append( (-1*sys.maxint,Directions.STOP) )
             optimalPair = max(scoreMove, key = lambda t: t[0])
         return optimalPair
 
-    (score,action) = vopt(self.depth + 1, 0, gameState)
-    print(score,action)
+    (score,action) = vopt(self.depth + 1, self.index, gameState)
     return action
     # END_YOUR_CODE
 
